@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    MySQLFlaskr
-    ~~~~~~
+    Watasync
+    ~~~~~~~~
 
-    A microblog example application written as Flask tutorial with
-    Flask and MySQL.
+    A gaibu dennou.
 
     :copyright: (c) 2011 by rysk92.
     :license: BSD, see LICENSE for more details.
@@ -31,7 +30,7 @@ def connect_db():
     """Returns a new connection to the database."""
     dbconnect = MySQLdb.connect(user='root',
                                 passwd='',
-                                db='flaskr',
+                                db='watasync',
                                 host='localhost')
 
     return dbconnect
