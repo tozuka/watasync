@@ -1,21 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if session.logged_in %}
-    <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
+    <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
       <dl>
-        <dt>Title:
-        <dd><input type=text size=30 name=title>
-        <dt>Text:
-        <dd><textarea name=text rows=5 cols=40></textarea>
+        <dt>メモするといいで(｀ω´):
+        <dd><textarea name=memo rows=4 cols=60></textarea>
         <dd><input type=submit value=Share>
       </dl>
     </form>
-  {% endif %}
-  <ul class=entries>
-  {% for entry in entries %}
-    <li><h2>{{ entry.title }}</h2>{{ entry.text|safe }}
+  <ul class=memos>
+  {% for memo in memos %}
+    {% autoescape false %}
+    <li><h2>{{ memo.created_at }}</h2>{{ memo.memo | e | replace("\n", "<br />\n") }}
+    {% endautoescape %}
   {% else %}
-    <li><em>Unbelievable.  No entries here so far</em>
+    <li><em>メモが無いよ</em>
   {% endfor %}
   </ul>
+  {% else %}
+  使いたかったらログインしてな！(｀ω´)
+  {% endif %}
 {% endblock %}

@@ -51,26 +51,26 @@ def after_request(response):
 
 
 @application.route('/')
-def show_entries():
+def show_memos():
     cur = g.db.cursor(DictCursor)
-    query = 'select title, text from entries order by id desc'
+    query = 'select memo,created_at from memo order by id desc'
     cur.execute(query)
-    entries = [dict(title=row['title'].decode('utf-8'), text=row['text'].decode('utf-8')) for row in cur.fetchall()]
-    return render_template('show_entries.html', entries=entries)
+    memos = [dict(memo=row['memo'].decode('utf-8'), created_at=row['created_at']) for row in cur.fetchall()]
+    return render_template('show_memos.html', memos=memos)
 
 
 @application.route('/add', methods=['POST'])
-def add_entry():
+def add_memo():
     if not session.get('logged_in'):
         abort(401)
     cur = g.db.cursor()
-    cur.execute('insert into entries (title, text) values(%s,%s)',
-                [request.form['title'].encode('utf-8'), request.form['text'].encode('utf-8')])
+    cur.execute('insert into memo (memo,created_at,updated_at) values(%s,NOW(),NOW())',
+                [request.form['memo'].encode('utf-8')])
     cur.close()
     g.db.commit()
 
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+    flash("メモしたで(｀ω´)".decode('utf-8'))
+    return redirect(url_for('show_memos'))
 
 
 @application.route('/login', methods=['GET', 'POST'])
@@ -78,21 +78,21 @@ def login():
     error = None
     if request.method == 'POST':
         if request.form['username'] != application.config['USERNAME']:
-            error = 'Invalid username'
+            error = 'ユーザ名が違うで(｀ω´)'.decode('utf-8')
         elif request.form['password'] != application.config['PASSWORD']:
-            error = 'Invalid password'
+            error = 'パスワードが違うで(｀ω´)'.decode('utf-8')
         else:
             session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('show_entries'))
+            flash("ログインしたで(｀ω´)".decode('utf-8'))
+            return redirect(url_for('show_memos'))
     return render_template('login.html', error=error)
 
 
 @application.route('/logout')
 def logout():
     session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('show_entries'))
+    flash('ログアウトしたで(｀ω´)'.decode('utf-8'))
+    return redirect(url_for('show_memos'))
 
 
 if __name__ == '__main__':
