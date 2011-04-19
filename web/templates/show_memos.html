@@ -1,23 +1,60 @@
 {% extends "layout.html" %}
 {% block body %}
+
+  <script type="text/javascript">
+    $(function() {
+      $.autopager();
+    });
+    $(function(){
+      var defaultc = '#999999';
+      var focusc = '#000000';
+      $('textarea,input[type="text"]').css('color',defaultc).focus(function(){
+        if($(this).val() == this.defaultValue){
+          $(this).val('').css('color', focusc);
+        }
+      })
+      .blur(function(){
+        if($(this).val() == this.defaultValue | $(this).val() == ''){
+          $(this).val(this.defaultValue).css('color',defaultc);
+        };
+      });
+    });
+    $(function() {
+      $("textarea").keyup(function(){
+        var counter = $(this).val().length;
+        $("#countUp").text(counter);
+        if(counter == 0){
+          $("#countUp").text("0");
+        }
+        if(counter >= 140){
+          $("#countUp").css("color","red");
+        } else{$("#countUp").css("color","#666");}
+      });
+    });
+  </script>
+
+
   {% if session.logged_in %}
     <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
       <dl>
-        <dt>メモするといいで(｀ω´):
-        <dd><textarea name=memo rows=4 cols=60></textarea>
+        <dd><textarea name=memo rows=4 cols=60>メモするといいで(｀ω´)</textarea>
         <dd><input type=submit value=Share>
+        <dd id="countUp">0
       </dl>
     </form>
-  <ul class=memos>
-  {% for memo in memos %}
-    {% autoescape false %}
-    <li><h2>{{ memo.created_at }}</h2>{{ memo.memo | e | replace("\n", "<br />\n") }}
-    {% endautoescape %}
+    <div class="content">
+    <ul class=memos>
+    {% for memo in memos %}
+      {% autoescape false %}
+      <li><h2>{{ memo.created_at }}</h2>{{ memo.memo | e | replace("\n", "<br />\n") }}
+      {% endautoescape %}
+    {% else %}
+      <li><em>メモが無いよ</em>
+    {% endfor %}
+    </ul>
+    </div>
+    <a href="/index.py/?page={{ nextpage}}" rel="next">次のページ / Next</a>
   {% else %}
-    <li><em>メモが無いよ</em>
-  {% endfor %}
-  </ul>
-  {% else %}
-  使いたかったらログインしてな！(｀ω´)
+    使いたかったらログインしてな！(｀ω´)
   {% endif %}
 {% endblock %}

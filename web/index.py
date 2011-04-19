@@ -50,13 +50,24 @@ def after_request(response):
     return response
 
 
-@application.route('/')
+@application.route('/', methods=['GET'])
 def show_memos():
+    page = request.args.get('page')
+    if page is None:
+      page = 1 
+    else:
+      page = int(page)
+    #if page.isdigit() == False:
+    #  page = 1
+    if page < 1: page=1
+    limit = 10
+    offset = (page-1)*limit
+
     cur = g.db.cursor(DictCursor)
-    query = 'select memo,created_at from memo order by id desc'
-    cur.execute(query)
+    query = 'select memo,created_at from memo order by id desc limit %s offset %s'
+    cur.execute(query,(limit,offset))
     memos = [dict(memo=row['memo'].decode('utf-8'), created_at=row['created_at']) for row in cur.fetchall()]
-    return render_template('show_memos.html', memos=memos)
+    return render_template('show_memos.html', memos=memos, nextpage=page+1)
 
 
 @application.route('/add', methods=['POST'])
