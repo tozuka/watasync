@@ -1,0 +1,8 @@
+{% for memo in memos %}
+  {% autoescape false %}
+  <li><h2>{{ memo.created_at }}</h2>{{ memo.memo | e | replace("\n", "<br />\n") }}
+  {% endautoescape %}
+{% else %}
+  <li><em>メモが無いよ</em>
+{% endfor %}
+

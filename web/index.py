@@ -52,22 +52,22 @@ def after_request(response):
 
 @application.route('/', methods=['GET'])
 def show_memos():
+    keyword = request.args.get('keyword')
+    
     page = request.args.get('page')
     if page is None:
       page = 1 
     else:
       page = int(page)
-    #if page.isdigit() == False:
-    #  page = 1
     if page < 1: page=1
     limit = 10
     offset = (page-1)*limit
 
-    cur = g.db.cursor(DictCursor)
-    query = 'select memo,created_at from memo order by id desc limit %s offset %s'
-    cur.execute(query,(limit,offset))
-    memos = [dict(memo=row['memo'].decode('utf-8'), created_at=row['created_at']) for row in cur.fetchall()]
-    return render_template('show_memos.html', memos=memos, nextpage=page+1)
+    #cur = g.db.cursor(DictCursor)
+    #query = 'select memo,created_at from memo order by id desc limit %s offset %s'
+    #cur.execute(query,(limit,offset))
+    #memos = [dict(memo=row['memo'].decode('utf-8'), created_at=row['created_at']) for row in cur.fetchall()]
+    return render_template('show_memos.html', keyword=keyword, nextpage=page+1)
 
 
 @application.route('/add', methods=['POST'])
@@ -83,6 +83,33 @@ def add_memo():
     flash("メモしたで(｀ω´)".decode('utf-8'))
     return redirect(url_for('show_memos'))
 
+@application.route('/search/', methods=['GET'])
+def search_memo():
+    if not session.get('logged_in'):
+        abort(401)
+    keyword = request.args.get('keyword')
+
+    page = request.args.get('page')
+    if page is None:
+      page = 1 
+    else:
+      page = int(page)
+    if page < 1: page=1
+    limit = 10
+    offset = (page-1)*limit
+
+    if keyword:
+      cur = g.db.cursor(DictCursor)
+      query = 'select memo,created_at from memo where memo like %s order by id desc limit %s offset %s'
+      cur.execute(query, ("%" + str(keyword.encode('utf-8')) + "%", limit, offset))
+    else:
+      cur = g.db.cursor(DictCursor)
+      query = 'select memo,created_at from memo order by id desc limit %s offset %s'
+      cur.execute(query,(limit,offset))
+
+
+    memos = [dict(created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+    return render_template('search.html', memos=memos)
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():

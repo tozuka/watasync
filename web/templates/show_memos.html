@@ -31,10 +31,40 @@
         } else{$("#countUp").css("color","#666");}
       });
     });
-  </script>
 
+    $(function(){
+      $("#search_results").slideUp();
+      $("#search_button").click(function(e){
+        e.preventDefault();
+        ajax_search();
+      });
+      $("#search_term").keyup(function(e){
+        e.preventDefault();
+        ajax_search();
+      });
+    });
+    function ajax_search_load(){
+      ajax_search();
+    }
+    function ajax_search(){
+      var search_val=$("#search_term").val();
+      
+      $("#search_results").show();
+      $.get("./search/", {keyword : search_val}, function(data){
+       if (data.length>0){
+         $("#search_results").html(data);
+       }
+      })
+      
+      $("#search_pager").show();
+      $("#search_pager").html("<a href='/index.py/?page={{ nextpage }}&keyword=" + search_val + "' rel='next'>次のページ / Next</a>");
+    } 
+  </script>
+  <body onLoad="ajax_search_load()">
 
   {% if session.logged_in %}
+
+    
     <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
       <dl>
         <dd><textarea name=memo rows=4 cols=60>メモするといいで(｀ω´)</textarea>
@@ -42,19 +72,22 @@
         <dd id="countUp">0
       </dl>
     </form>
+
+    <form id="searchform" method="post" class=search-memo>
+      <dl>
+        <dd><input type="text" name="search_term" id="search_term" />
+        <dd><input type="submit" value="search" id="search_button" />
+      </dl>
+    </form>
+
     <div class="content">
     <ul class=memos>
-    {% for memo in memos %}
-      {% autoescape false %}
-      <li><h2>{{ memo.created_at }}</h2>{{ memo.memo | e | replace("\n", "<br />\n") }}
-      {% endautoescape %}
-    {% else %}
-      <li><em>メモが無いよ</em>
-    {% endfor %}
+    <div id="search_results"></div>
     </ul>
     </div>
-    <a href="/index.py/?page={{ nextpage}}" rel="next">次のページ / Next</a>
+    <div id="search_pager"></div>
   {% else %}
     使いたかったらログインしてな！(｀ω´)
   {% endif %}
 {% endblock %}
+  </body>
