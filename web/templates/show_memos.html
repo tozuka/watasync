@@ -2,9 +2,7 @@
 {% block body %}
 
   <script type="text/javascript">
-    $(function() {
-      $.autopager();
-    });
+
     $(function(){
       var defaultc = '#999999';
       var focusc = '#000000';
@@ -33,7 +31,7 @@
     });
 
     $(function(){
-      $("#search_results").slideUp();
+      //$("#search_results").slideUp();
       $("#search_button").click(function(e){
         e.preventDefault();
         ajax_search();
@@ -50,7 +48,7 @@
       var search_val=$("#search_term").val();
       
       $("#search_results").show();
-      $.get("./search/", {keyword : search_val}, function(data){
+      $.get("./search/", {keyword : search_val, page : {{ page}} }, function(data){
        if (data.length>0){
          $("#search_results").html(data);
        }
@@ -58,12 +56,16 @@
       
       $("#search_pager").show();
       $("#search_pager").html("<a href='/index.py/?page={{ nextpage }}&keyword=" + search_val + "' rel='next'>次のページ / Next</a>");
+      
+      $("#search_header").show();
     } 
+    $(function() {
+      $.autopager();
+    });
   </script>
   <body onLoad="ajax_search_load()">
 
   {% if session.logged_in %}
-
     
     <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
       <dl>
@@ -81,6 +83,7 @@
     </form>
 
     <div class="content">
+    <div id="search_header"></div>
     <ul class=memos>
     <div id="search_results"></div>
     </ul>

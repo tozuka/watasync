@@ -67,7 +67,7 @@ def show_memos():
     #query = 'select memo,created_at from memo order by id desc limit %s offset %s'
     #cur.execute(query,(limit,offset))
     #memos = [dict(memo=row['memo'].decode('utf-8'), created_at=row['created_at']) for row in cur.fetchall()]
-    return render_template('show_memos.html', keyword=keyword, nextpage=page+1)
+    return render_template('show_memos.html', keyword=keyword, nextpage=page+1, page=page)
 
 
 @application.route('/add', methods=['POST'])
@@ -95,21 +95,33 @@ def search_memo():
     else:
       page = int(page)
     if page < 1: page=1
-    limit = 10
+    limit = 30
     offset = (page-1)*limit
 
     if keyword:
       cur = g.db.cursor(DictCursor)
       query = 'select memo,created_at from memo where memo like %s order by id desc limit %s offset %s'
       cur.execute(query, ("%" + str(keyword.encode('utf-8')) + "%", limit, offset))
+
+      memos = [dict(created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+
+      cur = g.db.cursor(DictCursor)
+      query = "select count(*) from memo where memo like %s"
+      cur.execute(query, ("%" + str(keyword.encode('utf-8')) + "%"))
+      count = cur.fetchone()['count(*)']
     else:
       cur = g.db.cursor(DictCursor)
       query = 'select memo,created_at from memo order by id desc limit %s offset %s'
-      cur.execute(query,(limit,offset))
+      cur.execute(query, (limit, offset))
 
+      memos = [dict(created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
 
-    memos = [dict(created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
-    return render_template('search.html', memos=memos)
+      cur = g.db.cursor(DictCursor)
+      query = "select count(*) from memo"
+      cur.execute(query)
+      count = cur.fetchone()['count(*)']
+
+    return render_template('search.html', memos=memos, count=count)
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
