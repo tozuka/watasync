@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+G_CONFIG = {}
+G_CONFIG['mysqldns'] = {
+  "user": "",
+  "passwd": "",
+  "name": "",
+  "host": "",
+  "charset": "utf8",
+  "unix_socket": "/var/lib/mysql/mysql.sock"
+}
