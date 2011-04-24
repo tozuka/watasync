@@ -46,7 +46,7 @@ def connect_db():
 def before_request():
     """Make sure we are connected to the database each request."""
     g.db = connect_db()
-
+    g.render_common_context = G_CONFIG['render_common_context']
 
 @application.after_request
 def after_request(response):
@@ -68,11 +68,7 @@ def show_memos():
     limit = 10
     offset = (page-1)*limit
 
-    #cur = g.db.cursor(DictCursor)
-    #query = 'select memo,created_at from memo order by id desc limit %s offset %s'
-    #cur.execute(query,(limit,offset))
-    #memos = [dict(memo=row['memo'].decode('utf-8'), created_at=row['created_at']) for row in cur.fetchall()]
-    return render_template('show_memos.html', keyword=keyword, nextpage=page+1, page=page)
+    return render_template('show_memos.html', common=g.render_common_context, keyword=keyword, nextpage=page+1, page=page)
 
 
 @application.route('/add', methods=['POST'])
