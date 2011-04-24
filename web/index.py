@@ -9,11 +9,14 @@
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import with_statement
+import os.path
 import MySQLdb
 from MySQLdb.cursors import DictCursor
 from contextlib import closing
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
+ROOTDIR = os.path.normpath(os.path.dirname(__file__) + "/../")
+execfile(ROOTDIR + "/config.py")
 
 # configuration
 DEBUG = True
@@ -29,10 +32,12 @@ application.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 def connect_db():
     """Returns a new connection to the database."""
-    dbconnect = MySQLdb.connect(user='root',
-                                passwd='',
-                                db='watasync',
-                                host='localhost')
+    dbconnect = MySQLdb.connect(user=G_CONFIG['mysqldns']['user'],
+                                passwd=G_CONFIG['mysqldns']['passwd'],
+                                db=G_CONFIG['mysqldns']['name'],
+                                host=G_CONFIG['mysqldns']['host'],
+                                charset=G_CONFIG['mysqldns']['charset'],
+                                unix_socket=G_CONFIG['mysqldns']['unix_socket'])
 
     return dbconnect
 
