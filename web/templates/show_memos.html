@@ -59,21 +59,77 @@
       
       $("#search_header").show();
     } 
-    $(function() {
-      $.autopager();
+
+    $(document).ready(function(){
+      $("#nav > li:first").addClass("select");
+      $("#nav > li").hover(function(){
+          $(this).css("cursor","pointer");
+      },function(){
+          $(this).css("cursor","default");
+      });
+      $("#tab > div").hide();
+      $("#tab > div:first").show();
+      $("#nav > li").click(function () {
+          $("#nav > li").removeClass("select");
+          $(this).addClass("select");
+          $("#tab > div").hide();
+          $("#tab > div").eq($("#nav > li").index(this)).fadeIn();
+      });
     });
+
   </script>
   <body onLoad="ajax_search_load()">
 
   {% if session.logged_in %}
-    
-    <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
-      <dl>
-        <dd><textarea name=memo rows=4 cols=60>メモするといいで(｀ω´)</textarea>
-        <dd><input type=submit value=Share>
-        <dd id="countUp">0
-      </dl>
-    </form>
+    <div id="tab">
+      <ul id="nav">
+        <li>短文</li>
+        <li>長文</li>
+        <li>ファイル</li>
+        <li>CUI</li>
+      </ul>
+      
+      <div>
+        <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
+          <dl>
+            <dd><textarea name=memo rows=4 cols=60>メモするといいで(｀ω´)</textarea>
+            <dd><input type=submit value=Share>
+            <dd id="countUp">0
+          </dl>
+        </form>
+      </div>
+      
+      <div>
+        <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
+          <dl>
+            <dd><textarea name=memo rows=50 cols=60>メモするといいで(｀ω´)</textarea>
+            <dd><input type=submit value=Share>
+            <dd id="countUp">0
+          </dl>
+        </form>
+      </div>
+      
+      <div>
+        <form action="#" method=post class=add-file>
+          <dl>
+            <dd><input type="file">
+            <dd><input type=submit value=Share>
+          </dl>
+        </form>
+      </div>
+      
+      <div>
+        <form action="#" method=post class=cui>
+          <dl>
+            <dd><textarea rows=4 cols=60>
+CUIによるインタフェースも用意するで(｀ω´)
+rsync -av -e ssh SRCPATH USERNAME@HOSTNAME:DESTPATH
+とかな(｀ω´)
+            </textarea>
+          </dl>
+        </form>
+      </div>
+    </div>
 
     <form id="searchform" method="post" class=search-memo>
       <dl>

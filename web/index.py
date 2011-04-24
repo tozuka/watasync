@@ -136,7 +136,7 @@ def login():
             session['logged_in'] = True
             flash("ログインしたで(｀ω´)".decode('utf-8'))
             return redirect(url_for('show_memos'))
-    return render_template('login.html', error=error)
+    return render_template('login.html', common=g.render_common_context, error=error)
 
 
 @application.route('/logout')
