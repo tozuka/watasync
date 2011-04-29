@@ -77,15 +77,19 @@
       });
     });
 
+    $(function(){
+       $('textarea').autogrow();
+    });
+
 // ]]>
   </script>
   <body onLoad="ajax_search_load()">
 
   {% if session.logged_in %}
+
     <div id="tab">
       <ul id="nav">
-        <li>短文</li>
-        <li>長文</li>
+        <li>文字</li>
         <li>ファイル</li>
         <li>CUI</li>
       </ul>
@@ -93,17 +97,7 @@
       <div>
         <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
           <dl>
-            <dd><textarea name=memo rows=4 cols=60>メモするといいで(｀ω´)</textarea>
-            <dd><input type=submit value=Share>
-            <dd id="countUp">0
-          </dl>
-        </form>
-      </div>
-      
-      <div>
-        <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
-          <dl>
-            <dd><textarea name=memo rows=50 cols=60>メモするといいで(｀ω´)</textarea>
+            <dd><textarea name=value rows=4 cols=60>メモするといいで(｀ω´)</textarea>
             <dd><input type=submit value=Share>
             <dd id="countUp">0
           </dl>

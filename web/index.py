@@ -78,7 +78,7 @@ def add_memo():
         abort(401)
     cur = g.db.cursor()
     cur.execute('insert into memo (memo,created_at,updated_at) values(%s,NOW(),NOW())',
-                [request.form['memo'].encode('utf-8')])
+                [request.form['value'].encode('utf-8')])
     cur.close()
     g.db.commit()
 
