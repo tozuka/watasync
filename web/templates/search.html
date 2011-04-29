@@ -1,7 +1,62 @@
+  <script type="text/javascript">
+    $(function() {
+      $(".editable_select").editable("/index.py/update", { 
+        indicator : '<img src="img/indicator.gif">',
+        data   : "{'Lorem ipsum':'Lorem ipsum','Ipsum dolor':'Ipsum dolor','Dolor sit':'Dolor sit'}",
+        type   : "select",
+        submit : "OK",
+        style  : "inherit",
+        submitdata : function() {
+          return {id : 2};
+        }
+      });
+      $(".editable_select_json").editable("/index.py/update", { 
+        indicator : '<img src="img/indicator.gif">',
+        loadurl : "json.php",
+        type   : "select",
+        submit : "OK",
+        style  : "inherit"
+      });
+
+
+      $(".editable_textarea").editable("/index.py/update", { 
+          indicator : "<img src='img/indicator.gif'>",
+          type   : 'textarea',
+          submitdata: { _method: "post" },
+          select : true,
+          submit : 'OK',
+          cancel : 'cancel',
+          cssclass : "editable",
+      });
+      $(".editable_textile").editable("/index.py/update", { 
+          indicator : "<img src='img/indicator.gif'>",
+          loadurl   : "/index.py/memo/",
+          type      : "textarea",
+          submit    : "OK",
+          cancel    : "Cancel",
+          tooltip   : "Click to edit..."
+      });
+      $(".click").editable("/echo.php", { 
+          indicator : "<img src='img/indicator.gif'>",
+          tooltip   : "Click to edit...",
+          style  : "inherit"
+      });
+      $(".dblclick").editable("/echo.php", { 
+          indicator : "<img src='img/indicator.gif'>",
+          tooltip   : "Doubleclick to edit...",
+          event     : "dblclick",
+          style  : "inherit"
+      });
+      $(".mouseover").editable("echo.php", { 
+          indicator : "<img src='img/indicator.gif'>",
+      });
+    });
+</script>
+
 約{{ count }}件
 {% for memo in memos %}
   {% autoescape false %}
-  <li><h2>{{ memo.created_at }}</h2>{{ memo.memo | e | replace("\n", "<br />\n") }}
+  <li><h2>{{ memo.created_at }}</h2><pre><p class="editable_textile" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
   {% endautoescape %}
 {% else %}
   <li><em>メモが無いよ</em>

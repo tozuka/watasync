@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 G_CONFIG = {}
 
+G_CONFIG['user'] = {
+  "username": "admin",
+  "password": "20110429"
+}
+
 G_CONFIG['render_common_context'] = {
   "title": "Watasync(｀ω´)".decode('utf-8'),
   "title_link": "http://watasync.example.com/index.py/"

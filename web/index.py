@@ -15,20 +15,21 @@ from MySQLdb.cursors import DictCursor
 from contextlib import closing
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
+
 ROOTDIR = os.path.normpath(os.path.dirname(__file__) + "/../")
 execfile(ROOTDIR + "/config.py")
 
 # configuration
 DEBUG = True
 SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
+USERNAME = G_CONFIG['user']['username']
+PASSWORD = G_CONFIG['user']['password']
 
 # create our little application :)
 application = Flask(__name__)
 application.config.from_object(__name__)
 application.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
+application.default_config.DEBUG = True
 
 def connect_db():
     """Returns a new connection to the database."""
@@ -84,6 +85,52 @@ def add_memo():
     flash("メモしたで(｀ω´)".decode('utf-8'))
     return redirect(url_for('show_memos'))
 
+@application.route('/update', methods=['POST'])
+def update_memo():
+    if not session.get('logged_in'):
+        abort(401)
+    memo_id = request.form['id']
+    cur = g.db.cursor()
+    cur.execute('update memo set memo=%s, updated_at=NOW() where id=%s',
+                [request.form['value'].encode('utf-8'),memo_id])
+    cur.close()
+    g.db.commit()
+    
+    cur = g.db.cursor(DictCursor)
+    query = 'select id,memo,created_at from memo where id = %s'
+    cur.execute(query, memo_id)
+
+    result = cur.fetchone()
+    memo = result['memo'].decode('utf-8')
+    return render_template('memo.html', memo=memo)
+
+@application.route('/delete', methods=['POST'])
+def delete_memo():
+    if not session.get('logged_in'):
+        abort(401)
+    cur = g.db.cursor()
+    cur.execute('insert into memo (memo,created_at,updated_at) values(%s,NOW(),NOW())',
+                [request.form['memo'].encode('utf-8')])
+    cur.close()
+    g.db.commit()
+
+    flash("メモしたで(｀ω´)".decode('utf-8'))
+    return redirect(url_for('show_memos'))
+
+@application.route('/memo/', methods=['GET'])
+def show_memo():
+    if not session.get('logged_in'):
+        abort(401)
+    memo_id = request.args.get('id')
+
+    cur = g.db.cursor(DictCursor)
+    query = 'select id,memo,created_at from memo where id = %s'
+    cur.execute(query, memo_id)
+
+    result = cur.fetchone()
+    memo = result['memo'].decode('utf-8')
+    return render_template('memo.html', memo=memo)
+
 @application.route('/search/', methods=['GET'])
 def search_memo():
     if not session.get('logged_in'):
@@ -101,10 +148,10 @@ def search_memo():
 
     if keyword:
       cur = g.db.cursor(DictCursor)
-      query = 'select memo,created_at from memo where memo like %s order by id desc limit %s offset %s'
+      query = 'select id,memo,created_at from memo where memo like %s order by id desc limit %s offset %s'
       cur.execute(query, ("%" + str(keyword.encode('utf-8')) + "%", limit, offset))
 
-      memos = [dict(created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+      memos = [dict(id=row['id'],created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
 
       cur = g.db.cursor(DictCursor)
       query = "select count(*) from memo where memo like %s"
@@ -112,10 +159,10 @@ def search_memo():
       count = cur.fetchone()['count(*)']
     else:
       cur = g.db.cursor(DictCursor)
-      query = 'select memo,created_at from memo order by id desc limit %s offset %s'
+      query = 'select id,memo,created_at from memo order by id desc limit %s offset %s'
       cur.execute(query, (limit, offset))
 
-      memos = [dict(created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+      memos = [dict(id=row['id'],created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
 
       cur = g.db.cursor(DictCursor)
       query = "select count(*) from memo"
@@ -145,6 +192,6 @@ def logout():
     flash('ログアウトしたで(｀ω´)'.decode('utf-8'))
     return redirect(url_for('show_memos'))
 
-
 if __name__ == '__main__':
     application.run()
+
