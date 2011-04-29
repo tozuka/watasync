@@ -2,9 +2,7 @@
 {% block body %}
 
   <script type="text/javascript">
-    $(function() {
-      $.autopager();
-    });
+// <![CDATA[
     $(function(){
       var defaultc = '#999999';
       var focusc = '#000000';
@@ -50,7 +48,7 @@
       var search_val=$("#search_term").val();
       
       $("#search_results").show();
-      $.get("./search/", {keyword : search_val}, function(data){
+      $.get("./search/", {keyword : search_val, page : {{ page}} }, function(data){
        if (data.length>0){
          $("#search_results").html(data);
        }
@@ -58,20 +56,76 @@
       
       $("#search_pager").show();
       $("#search_pager").html("<a href='/index.py/?page={{ nextpage }}&keyword=" + search_val + "' rel='next'>次のページ / Next</a>");
+      
+      $("#search_header").show();
     } 
+
+    $(document).ready(function(){
+      $("#nav > li:first").addClass("select");
+      $("#nav > li").hover(function(){
+          $(this).css("cursor","pointer");
+      },function(){
+          $(this).css("cursor","default");
+      });
+      $("#tab > div").hide();
+      $("#tab > div:first").show();
+      $("#nav > li").click(function () {
+          $("#nav > li").removeClass("select");
+          $(this).addClass("select");
+          $("#tab > div").hide();
+          $("#tab > div").eq($("#nav > li").index(this)).fadeIn();
+      });
+    });
+
+    $(function(){
+       $('textarea').autogrow();
+    });
+
+// ]]>
   </script>
   <body onLoad="ajax_search_load()">
 
   {% if session.logged_in %}
 
-    
-    <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
-      <dl>
-        <dd><textarea name=memo rows=4 cols=60>メモれ！コピれ！(｀ω´)</textarea>
-        <dd><input type=submit value=Share>
-        <dd id="countUp">0
-      </dl>
-    </form>
+    <div id="tab">
+      <ul id="nav">
+        <li>文字</li>
+        <li>ファイル</li>
+        <li>CUI</li>
+      </ul>
+      
+      <div>
+        <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
+          <dl>
+            <dd><textarea name=value rows=4 cols=60>メモれ！コピれ！(｀ω´)</textarea>
+            <!-- <dd><textarea name=value rows=4 cols=60>メモするといいで(｀ω´)</textarea> -->
+            <dd><input type=submit value=Share>
+            <dd id="countUp">0
+          </dl>
+        </form>
+      </div>
+      
+      <div>
+        <form action="#" method=post class=add-file>
+          <dl>
+            <dd><input type="file">
+            <dd><input type=submit value=Share>
+          </dl>
+        </form>
+      </div>
+      
+      <div>
+        <form action="#" method=post class=cui>
+          <dl>
+            <dd><textarea rows=4 cols=60>
+CUIによるインタフェースも用意するで(｀ω´)
+rsync -av -e ssh SRCPATH USERNAME@HOSTNAME:DESTPATH
+とかな(｀ω´)
+            </textarea>
+          </dl>
+        </form>
+      </div>
+    </div>
 
     <form id="searchform" method="post" class=search-memo>
       <dl>
@@ -80,7 +134,11 @@
       </dl>
     </form>
 
+
+
+
     <div class="content">
+    <div id="search_header"></div>
     <ul class=memos>
     <div id="search_results"></div>
     </ul>

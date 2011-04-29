@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+G_CONFIG = {}
+
+G_CONFIG['user'] = {
+  "username": "admin",
+  "password": "20110429"
+}
+
+G_CONFIG['render_common_context'] = {
+  "title": "Watasync(｀ω´)".decode('utf-8'),
+  "title_link": "http://watasync.example.com/index.py/"
+}
+
+G_CONFIG['mysqldns'] = {
+  "user": "",
+  "passwd": "",
+  "name": "",
+  "host": "",
+  "charset": "utf8",
+  "unix_socket": "/var/lib/mysql/mysql.sock"
+}

@@ -1,6 +1,108 @@
+  <script type="text/javascript">
+    $(function() {
+      $(".editable_select").editable("/index.py/update", { 
+        indicator : '<img src="img/indicator.gif">',
+        data   : "{'Lorem ipsum':'Lorem ipsum','Ipsum dolor':'Ipsum dolor','Dolor sit':'Dolor sit'}",
+        type   : "select",
+        submit : "OK",
+        style  : "inherit",
+        submitdata : function() {
+          return {id : 2};
+        }
+      });
+      $(".editable_select_json").editable("/index.py/update", { 
+        indicator : '<img src="img/indicator.gif">',
+        loadurl : "json.php",
+        type   : "select",
+        submit : "OK",
+        style  : "inherit"
+      });
+
+
+      $(".editable_textarea").editable("/index.py/update", { 
+          indicator : "<img src='img/indicator.gif'>",
+          type   : 'textarea',
+          submitdata: { _method: "post" },
+          select : true,
+          submit : 'OK',
+          cancel : 'cancel',
+          cssclass : "editable",
+      });
+      $(".editable_textile").editable("/index.py/update", { 
+          indicator : "<img src='img/indicator.gif'>",
+          loadurl   : "/index.py/memo/",
+          type      : "textarea",
+          submit    : "OK",
+          cancel    : "Cancel",
+          tooltip   : "Click to edit..."
+      });
+      $(".click").editable("/echo.php", { 
+          indicator : "<img src='img/indicator.gif'>",
+          tooltip   : "Click to edit...",
+          style  : "inherit"
+      });
+      $(".dblclick").editable("/echo.php", { 
+          indicator : "<img src='img/indicator.gif'>",
+          tooltip   : "Doubleclick to edit...",
+          event     : "dblclick",
+          style  : "inherit"
+      });
+      $(".mouseover").editable("echo.php", { 
+          indicator : "<img src='img/indicator.gif'>",
+      });
+    });
+
+    $(document).ready(function() {
+      $(".charcounter").editable("/index.py/update", { 
+        indicator : "<img src='img/indicator.gif'>",
+        type      : "charcounter",
+        submit    : 'OK',
+        tooltip   : "Click to edit...",
+        onblur    : "ignore",
+        charcounter : {
+           characters : 60
+        }
+      });
+
+      $(".autogrow").editable("/index.py/update", { 
+          indicator : "<img src='img/indicator.gif'>",
+          loadurl   : "/index.py/memo/",
+          type      : "autogrow",
+          submit    : 'OK',
+          cancel    : 'cancel',
+          tooltip   : "Click to edit...",
+          onblur    : "ignore",
+          autogrow : {
+             lineHeight : 16,
+             minHeight  : 32
+          }
+       });
+    });
+
+    {% for memo in memos %}
+        $(function() {
+          $('input.tags_{{memo.id}}').tagsInput({
+            interactive:true,
+            defaultText:'add a tag',
+            minChars:0,width:'500px',
+            height:'33px',
+            'hide':true,
+            'delimiter':',',
+            autocomplete:{selectFirst:false},
+            'unique':true
+          });
+        });
+    {% endfor %}
+</script>
+
+約{{ count }}件
 {% for memo in memos %}
   {% autoescape false %}
-  <li><h2>{{ memo.created_at }}</h2>{{ memo.memo | e | replace("\n", "<br />\n") }}
+
+    <li><h2>{{ memo.created_at }}</h2><pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
+    <form id="{{ memo.id}}">
+      <input id="tags_{{ memo.id }}" type="text" class="tags_{{memo.id}}" value="todo,done,食" />
+    </form>
   {% endautoescape %}
 {% else %}
   <li><em>知らんで</em>
