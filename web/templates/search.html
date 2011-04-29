@@ -51,12 +51,41 @@
           indicator : "<img src='img/indicator.gif'>",
       });
     });
+
+    $(document).ready(function() {
+      $(".charcounter").editable("/index.py/update", { 
+        indicator : "<img src='img/indicator.gif'>",
+        type      : "charcounter",
+        submit    : 'OK',
+        tooltip   : "Click to edit...",
+        onblur    : "ignore",
+        charcounter : {
+           characters : 60
+        }
+      });
+
+      $(".autogrow").editable("/index.py/update", { 
+          indicator : "<img src='img/indicator.gif'>",
+          loadurl   : "/index.py/memo/",
+          type      : "autogrow",
+          submit    : 'OK',
+          cancel    : 'cancel',
+          tooltip   : "Click to edit...",
+          onblur    : "ignore",
+          autogrow : {
+             lineHeight : 16,
+             minHeight  : 32
+          }
+       });
+    });
+
 </script>
 
 約{{ count }}件
 {% for memo in memos %}
   {% autoescape false %}
-  <li><h2>{{ memo.created_at }}</h2><pre><p class="editable_textile" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
+  <li><h2>{{ memo.created_at }}</h2><pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
+
   {% endautoescape %}
 {% else %}
   <li><em>メモが無いよ</em>
