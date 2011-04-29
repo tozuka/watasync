@@ -79,13 +79,30 @@
        });
     });
 
+    {% for memo in memos %}
+        $(function() {
+          $('input.tags_{{memo.id}}').tagsInput({
+            interactive:true,
+            defaultText:'add a tag',
+            minChars:0,width:'500px',
+            height:'33px',
+            'hide':true,
+            'delimiter':',',
+            autocomplete:{selectFirst:false},
+            'unique':true
+          });
+        });
+    {% endfor %}
 </script>
 
 約{{ count }}件
 {% for memo in memos %}
   {% autoescape false %}
-  <li><h2>{{ memo.created_at }}</h2><pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
 
+    <li><h2>{{ memo.created_at }}</h2><pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
+    <form id="{{ memo.id}}">
+      <input id="tags_{{ memo.id }}" type="text" class="tags_{{memo.id}}" value="todo,done,食" />
+    </form>
   {% endautoescape %}
 {% else %}
   <li><em>メモが無いよ</em>
