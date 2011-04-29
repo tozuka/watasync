@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/usr/local/bin/python
+#-*- coding: utf-8 -*-
 """
     Watasync
     ~~~~~~~~
@@ -31,7 +32,8 @@ def connect_db():
     """Returns a new connection to the database."""
     dbconnect = MySQLdb.connect(user='root',
                                 passwd='',
-                                db='watasync',
+                                db='co33k_watasync',
+                                unix_socket='/tmp/mysql.sock',
                                 host='localhost')
 
     return dbconnect
@@ -134,4 +136,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    application.run()
+    application.run(host='0.0.0.0', port=5338)

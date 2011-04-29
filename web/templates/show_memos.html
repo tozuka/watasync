@@ -33,7 +33,7 @@
     });
 
     $(function(){
-      $("#search_results").slideUp();
+      //$("#search_results").slideUp();
       $("#search_button").click(function(e){
         e.preventDefault();
         ajax_search();
@@ -67,7 +67,7 @@
     
     <form action="{{ url_for('add_memo') }}" method=post class=add-memo>
       <dl>
-        <dd><textarea name=memo rows=4 cols=60>メモするといいで(｀ω´)</textarea>
+        <dd><textarea name=memo rows=4 cols=60>メモれ！コピれ！(｀ω´)</textarea>
         <dd><input type=submit value=Share>
         <dd id="countUp">0
       </dl>
@@ -87,7 +87,7 @@
     </div>
     <div id="search_pager"></div>
   {% else %}
-    使いたかったらログインしてな！(｀ω´)
+    はいらなつかえへんで！(｀ω´)
   {% endif %}
 {% endblock %}
   </body>

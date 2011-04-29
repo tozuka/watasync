@@ -1,0 +1,6 @@
+Options +FollowSymLinks +ExecCGI
+
+
+AddHandler cgi-script .py
+
+
