@@ -104,6 +104,26 @@ def update_memo():
     memo = result['memo'].decode('utf-8')
     return render_template('memo.html', memo=memo)
 
+@application.route('/updatetag', methods=['POST'])
+def update_tag():
+    if not session.get('logged_in'):
+        abort(401)
+    tag = request.form['tag'].encode('utf-8')
+    memo_id = request.form['memo_id']
+    cur = g.db.cursor()
+    cur.execute('update memo set tag=%s, updated_at=NOW() where id=%s',
+                [tag,memo_id])
+    cur.close()
+    g.db.commit()
+    
+    cur = g.db.cursor(DictCursor)
+    query = 'select id,tag from memo where id = %s'
+    cur.execute(query, memo_id)
+
+    result = cur.fetchone()
+    tag = result['tag'].decode('utf-8')
+    return render_template('tag.html', tag=tag)
+
 @application.route('/delete', methods=['POST'])
 def delete_memo():
     if not session.get('logged_in'):

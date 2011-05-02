@@ -78,31 +78,64 @@
           }
        });
     });
+    var tags=[
+          {tag:"todo",freq:20},{tag:"cal",freq:21},{tag:"memo",freq:22},{tag:"gohan",freq:23},{tag:"食事",freq:100}
+        ]
 
-    {% for memo in memos %}
-        $(function() {
-          $('input.tags_{{memo.id}}').tagsInput({
-            interactive:true,
-            defaultText:'add a tag',
-            minChars:0,width:'500px',
-            height:'33px',
-            'hide':true,
-            'delimiter':',',
-            autocomplete:{selectFirst:false},
-            'unique':true
-          });
-        });
-    {% endfor %}
-</script>
+
+</script> 
+
+<link rel=stylesheet href="/static/jquery.tagInput.css" type="text/css">
+<script type="text/javascript" src="/static/jquery.tagInput.js"></script>
+
 
 約{{ count }}件
 {% for memo in memos %}
   {% autoescape false %}
 
-    <li><h2>{{ memo.created_at }}</h2><pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
-    <form id="{{ memo.id}}">
-      <input id="tags_{{ memo.id }}" type="text" class="tags_{{memo.id}}" value="todo,done,食" />
+   <li><h2>{{ memo.created_at }}</h2><pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
+
+    <div id="tag_results_{{ memo.id }}">hoge hoge</div>
+
+    <form method=post class=add-tag id="tag-form_{{ memo.id }}">
+      <input type="text" size="80" id="tag_{{ memo.id }}" name="tag_{{ memo.id }}" >
+      <input type="hidden" id="memo_id" name="memo_id" value="{{ memo.id }}">
+      <input type=submit value=taged>
     </form>
+    
+    <script type="text/javascript">
+      $(function(){ 
+          $("#tag-form_{{ memo.id }}").submit(function(){ 
+              ajax_post_{{ memo.id }}();
+              return false;
+          }); 
+      }); 
+      function ajax_post_{{ memo.id }}(){ 
+        $("#tag_results_{{ memo.id }}").show();
+        var search_val = $("#tag_{{ memo.id }}").val();
+        var memo_id_val = $("#memo_id").val();
+        $.post("/index.py/updatetag", {tag:search_val,memo_id:memo_id_val}, function(data){
+         if (data.length>0){ 
+           $("#tag_results_{{ memo.id }}").html(data); 
+         } 
+        }) 
+      } 
+    </script>
+    
+    <script type="text/javascript">
+      $(function(){
+        $("#tag_{{ memo.id }}").tagInput({
+          tags:tags,
+          sortBy:"frequency",
+          suggestedTags:["todo","idea","cal","memo","gohan"],
+          tagSeparator:" ",
+          autoFilter:true,
+          autoStart:false,
+          boldify:true
+        })
+      })
+    </script>
+
   {% endautoescape %}
 {% else %}
   <li><em>メモが無いよ</em>
