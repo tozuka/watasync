@@ -173,15 +173,33 @@ def search_memo():
     limit = 30
     offset = (page-1)*limit
 
+    tags = {}
+    memos = {}
+    result_memos = []
     if keyword:
       cur = g.db.cursor(DictCursor)
       query = 'select id,memo,created_at from memo where memo like %s order by id desc limit %s offset %s'
       cur.execute(query, ("%" + str(keyword.encode('utf-8')) + "%", limit, offset))
 
-      memos = [dict(id=row['id'],created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+      for row in cur.fetchall():
+        memo_id = str(int(row['id']))
+        if type(memos.get(memo_id)) != DictType:
+          memos[memo_id] = {}
+        memos[memo_id]['id'] = memo_id
+        memos[memo_id]['memo'] = row['memo'].decode('utf-8')
+        memos[memo_id]['created_at'] = row['created_at']
 
+      for row in cur.fetchall():
+        memo_id = str(int(row['id']))
+        if type(memos.get(memo_id)) != DictType:
+          memos[memo_id] = {}
+        memos[memo_id]['id'] = memo_id
+        memos[memo_id]['memo'] = row['memo'].decode('utf-8')
+        memos[memo_id]['created_at'] = row['created_at']
+      
+      #tag
       result_memo_ids = []
-      for memo in memos:
+      for memo in memos.values():
         result_memo_ids.append(memo['id'])
       
       in_string = ""
@@ -191,25 +209,14 @@ def search_memo():
         in_string += str(memo_id)
       
       query = "select id,memo_id,tag from tag where memo_id IN (" + in_string + ")"
+      
       cur = g.db.cursor(DictCursor)
       cur.execute(query)
-
-      #tags = [dict(id=row['id'],memo_id=row['memo_id'],tag=row['tag'].decode('utf-8')) for row in cur.fetchall()]
-      tags = {}
       for row in cur.fetchall():
-        if type(tags.get(str(int(row['memo_id'])))) != ListType:
-          tags[str(int(row['memo_id']))] = []
-          fh = open("/tmp/err2.txt","a")
-          fh.write("init"+"\n")
-          fh.close()
-        tags[str(int(row['memo_id']))].append(row['tag'].decode('utf-8'))
-        fh = open("/tmp/err2.txt","a")
-        fh.write("page=" + str(row['tag'].decode('utf-8')) + "\n")
-        fh.close()
-
-      fh = open("/tmp/err2.txt","a")
-      fh.write("page=" + str(tags) + "\n")
-      fh.close()
+        memo_id = str(int(row['memo_id']))
+        if type(memos[memo_id].get('tags')) != ListType:
+          memos[memo_id]['tags'] = []
+        memos[memo_id]['tags'].append(row['tag'].decode('utf-8'))
 
       cur = g.db.cursor(DictCursor)
       query = "select count(*) from memo where memo like %s"
@@ -220,14 +227,48 @@ def search_memo():
       query = 'select id,memo,created_at from memo order by id desc limit %s offset %s'
       cur.execute(query, (limit, offset))
 
-      memos = [dict(id=row['id'],created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+      for row in cur.fetchall():
+        memo_id = str(int(row['id']))
+        if type(memos.get(memo_id)) != DictType:
+          memos[memo_id] = {}
+        memos[memo_id]['id'] = memo_id
+        memos[memo_id]['memo'] = row['memo'].decode('utf-8')
+        memos[memo_id]['created_at'] = row['created_at']
+      
+      #tag
+      result_memo_ids = []
+      for memo in memos.values():
+        result_memo_ids.append(memo['id'])
+      
+      in_string = ""
+      for memo_id in result_memo_ids:
+        if in_string != "":
+          in_string += ","
+        in_string += str(memo_id)
+      
+      query = "select id,memo_id,tag from tag where memo_id IN (" + in_string + ")"
+      
+      cur = g.db.cursor(DictCursor)
+      cur.execute(query)
+      for row in cur.fetchall():
+        memo_id = str(int(row['memo_id']))
+        if type(memos[memo_id].get('tags')) != ListType:
+          memos[memo_id]['tags'] = []
+        memos[memo_id]['tags'].append(row['tag'].decode('utf-8'))
 
       cur = g.db.cursor(DictCursor)
       query = "select count(*) from memo"
       cur.execute(query)
       count = cur.fetchone()['count(*)']
+    
+    for k in sorted(memos.keys(), reverse=True):
+      result_memos.append(memos[k])
 
-    return render_template('search.html', memos=memos, count=count)
+    fh = open("/tmp/err2.txt","a")
+    for row in result_memos:
+      fh.write("memos=" + str(row) + "\n\n\n")
+    fh.close()
+    return render_template('search.html', memos=result_memos, count=count, tags=tags)
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():

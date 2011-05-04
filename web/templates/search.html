@@ -83,6 +83,16 @@
         ]
 
 
+    function ajax_post(memo_id){ 
+      $("#tag_results_" + memo_id).show();
+      var search_val = $("#tag_"+memo_id).val();
+      var memo_id_val = memo_id;
+      $.post("/index.py/updatetag", {tag:search_val,memo_id:memo_id_val}, function(data){
+       if (data.length>0){ 
+         $("#tag_results_"+memo_id).html(data); 
+       } 
+      }) 
+      } 
 </script> 
 
 <link rel=stylesheet href="/static/jquery.tagInput.css" type="text/css">
@@ -97,7 +107,7 @@
    @type: text/plain
    <pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
 
-    <div id="tag_results_{{ memo.id }}">{% for tag in tags %}{{tag}} {% endfor %}</div>
+    <div id="tag_results_{{ memo.id }}">{{memo.tags}}</div>
 
     <form method=post class=add-tag id="tag-form_{{ memo.id }}">
       <input type="text" size="80" id="tag_{{ memo.id }}" name="tag_{{ memo.id }}" >
@@ -108,20 +118,10 @@
     <script type="text/javascript">
       $(function(){ 
           $("#tag-form_{{ memo.id }}").submit(function(){ 
-              ajax_post_{{ memo.id }}();
+              ajax_post({{ memo.id }});
               return false;
           }); 
       }); 
-      function ajax_post_{{ memo.id }}(){ 
-        $("#tag_results_{{ memo.id }}").show();
-        var search_val = $("#tag_{{ memo.id }}").val();
-        var memo_id_val = $("#memo_id").val();
-        $.post("/index.py/updatetag", {tag:search_val,memo_id:memo_id_val}, function(data){
-         if (data.length>0){ 
-           $("#tag_results_{{ memo.id }}").html(data); 
-         } 
-        }) 
-      } 
     </script>
     
     <script type="text/javascript">
