@@ -93,9 +93,11 @@
 {% for memo in memos %}
   {% autoescape false %}
 
-   <li><h2>{{ memo.created_at }}</h2><pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
+   <li><h2>{{ memo.created_at }}</h2>
+   @type: text/plain
+   <pre><p class="autogrow" id="{{memo.id}}">{{ memo.memo | e }}</p></pre>
 
-    <div id="tag_results_{{ memo.id }}">hoge hoge</div>
+    <div id="tag_results_{{ memo.id }}">{% for tag in tags %}{{tag}} {% endfor %}</div>
 
     <form method=post class=add-tag id="tag-form_{{ memo.id }}">
       <input type="text" size="80" id="tag_{{ memo.id }}" name="tag_{{ memo.id }}" >

@@ -19,6 +19,16 @@ CREATE TABLE `user` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Save users';
 
+DROP TABLE IF EXISTS `tag`;
+CREATE TABLE `tag` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Serial number',
+  `memo_id` int(11) DEFAULT NULL,
+  `tag` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
+  `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Save tag info';
+
 DROP TABLE IF EXISTS `meta`;
 CREATE TABLE `meta` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Serial number',
