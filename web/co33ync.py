@@ -18,7 +18,8 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
 ROOTDIR = os.path.normpath(os.path.dirname(__file__) + "/../")
-execfile(ROOTDIR + "/config.py")
+#execfile(ROOTDIR + "/config.py")
+execfile("../config.py")
 
 # configuration
 DEBUG = True
