@@ -16,6 +16,8 @@ from MySQLdb.cursors import DictCursor
 from contextlib import closing
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
+from types import *
+
 
 ROOTDIR = os.path.normpath(os.path.dirname(__file__) + "/../")
 #execfile(ROOTDIR + "/config.py")
@@ -106,6 +108,31 @@ def update_memo():
     memo = result['memo'].decode('utf-8')
     return render_template('memo.html', memo=memo)
 
+@application.route('/updatetag', methods=['POST'])
+def update_tag():
+    if not session.get('logged_in'):
+        abort(401)
+    
+    tag = request.form['tag'].encode('utf-8')
+    memo_id = request.form['memo_id']
+    
+    cur = g.db.cursor()
+    cur.execute('insert into tag (tag,memo_id,created_at,updated_at) value(%s,%s,NOW(),NOW())', [tag,memo_id])
+    cur.close()
+    g.db.commit()
+    
+    cur = g.db.cursor(DictCursor)
+    query = 'select tag from tag where memo_id = %s order by tag'
+    cur.execute(query, memo_id)
+
+    result = cur.fetchall()
+    fh = open("/tmp/err2.txt","a")
+    fh.write("page=" + str(memo_id) + "\n")
+    fh.write("page=" + str(result) + "\n")
+    fh.close()
+
+    return render_template('tag.html', tags=result)
+
 @application.route('/delete', methods=['POST'])
 def delete_memo():
     if not session.get('logged_in'):
@@ -148,12 +175,50 @@ def search_memo():
     limit = 30
     offset = (page-1)*limit
 
+    tags = {}
+    memos = {}
+    result_memos = []
     if keyword:
       cur = g.db.cursor(DictCursor)
       query = 'select id,memo,created_at from memo where memo like %s order by id desc limit %s offset %s'
       cur.execute(query, ("%" + str(keyword.encode('utf-8')) + "%", limit, offset))
 
-      memos = [dict(id=row['id'],created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+      for row in cur.fetchall():
+        memo_id = str(int(row['id']))
+        if type(memos.get(memo_id)) != DictType:
+          memos[memo_id] = {}
+        memos[memo_id]['id'] = memo_id
+        memos[memo_id]['memo'] = row['memo'].decode('utf-8')
+        memos[memo_id]['created_at'] = row['created_at']
+
+      for row in cur.fetchall():
+        memo_id = str(int(row['id']))
+        if type(memos.get(memo_id)) != DictType:
+          memos[memo_id] = {}
+        memos[memo_id]['id'] = memo_id
+        memos[memo_id]['memo'] = row['memo'].decode('utf-8')
+        memos[memo_id]['created_at'] = row['created_at']
+      
+      #tag
+      result_memo_ids = []
+      for memo in memos.values():
+        result_memo_ids.append(memo['id'])
+      
+      in_string = ""
+      for memo_id in result_memo_ids:
+        if in_string != "":
+          in_string += ","
+        in_string += str(memo_id)
+      
+      query = "select id,memo_id,tag from tag where memo_id IN (" + in_string + ")"
+      
+      cur = g.db.cursor(DictCursor)
+      cur.execute(query)
+      for row in cur.fetchall():
+        memo_id = str(int(row['memo_id']))
+        if type(memos[memo_id].get('tags')) != ListType:
+          memos[memo_id]['tags'] = []
+        memos[memo_id]['tags'].append(row['tag'].decode('utf-8'))
 
       cur = g.db.cursor(DictCursor)
       query = "select count(*) from memo where memo like %s"
@@ -164,14 +229,48 @@ def search_memo():
       query = 'select id,memo,created_at from memo order by id desc limit %s offset %s'
       cur.execute(query, (limit, offset))
 
-      memos = [dict(id=row['id'],created_at=row['created_at'],memo=row['memo'].decode('utf-8')) for row in cur.fetchall()]
+      for row in cur.fetchall():
+        memo_id = str(int(row['id']))
+        if type(memos.get(memo_id)) != DictType:
+          memos[memo_id] = {}
+        memos[memo_id]['id'] = memo_id
+        memos[memo_id]['memo'] = row['memo'].decode('utf-8')
+        memos[memo_id]['created_at'] = row['created_at']
+      
+      #tag
+      result_memo_ids = []
+      for memo in memos.values():
+        result_memo_ids.append(memo['id'])
+      
+      in_string = ""
+      for memo_id in result_memo_ids:
+        if in_string != "":
+          in_string += ","
+        in_string += str(memo_id)
+      
+      query = "select id,memo_id,tag from tag where memo_id IN (" + in_string + ")"
+      
+      cur = g.db.cursor(DictCursor)
+      cur.execute(query)
+      for row in cur.fetchall():
+        memo_id = str(int(row['memo_id']))
+        if type(memos[memo_id].get('tags')) != ListType:
+          memos[memo_id]['tags'] = []
+        memos[memo_id]['tags'].append(row['tag'].decode('utf-8'))
 
       cur = g.db.cursor(DictCursor)
       query = "select count(*) from memo"
       cur.execute(query)
       count = cur.fetchone()['count(*)']
+    
+    for k in sorted(memos.keys(), reverse=True):
+      result_memos.append(memos[k])
 
-    return render_template('search.html', memos=memos, count=count)
+    fh = open("/tmp/err2.txt","a")
+    for row in result_memos:
+      fh.write("memos=" + str(row) + "\n\n\n")
+    fh.close()
+    return render_template('search.html', memos=result_memos, count=count, tags=tags)
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
